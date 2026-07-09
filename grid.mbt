@@ -7,10 +7,17 @@ pub(all) struct Grid {
   width : Int
   height : Int
   mut blocked : Array[Bool]
+  mut weights : Array[Int]
 }
 
 pub fn Grid::new(width : Int, height : Int) -> Grid {
-  Grid::{ width, height, blocked: Array::make(width * height, false) }
+  let total = width * height
+  Grid::{
+    width,
+    height,
+    blocked: Array::make(total, false),
+    weights: Array::make(total, 1),
+  }
 }
 
 pub fn Grid::inside(self : Grid, p : Point) -> Bool {
@@ -33,6 +40,20 @@ pub fn Grid::set_blocked(self : Grid, p : Point, value : Bool) -> Unit {
 
 pub fn Grid::is_blocked(self : Grid, p : Point) -> Bool {
   !self.inside(p) || self.blocked[self.index(p)]
+}
+
+pub fn Grid::set_cost(self : Grid, p : Point, cost : Int) -> Unit {
+  if self.inside(p) && cost >= 1 {
+    self.weights[self.index(p)] = cost
+  }
+}
+
+pub fn Grid::cost_at(self : Grid, p : Point) -> Int {
+  if self.inside(p) {
+    self.weights[self.index(p)]
+  } else {
+    1_000_000_000
+  }
 }
 
 pub fn Grid::to_graph(self : Grid) -> Graph {
@@ -312,7 +333,7 @@ pub fn Grid::dijkstra(self : Grid, start : Point, goal : Point) -> PathReport {
 
 fn Grid::connect_if_open(self : Grid, graph : Graph, from : Point, to : Point) -> Unit {
   if self.inside(to) && !self.is_blocked(to) {
-    graph.add_edge(self.index(from), self.index(to), 1)
+    graph.add_edge(self.index(from), self.index(to), self.cost_at(to))
   }
 }
 
@@ -380,7 +401,7 @@ fn Grid::relax_grid_neighbor(
     return
   }
   let next = self.index(next_point)
-  let tentative = g_score[current] + 1
+  let tentative = g_score[current] + self.cost_at(next_point)
   if tentative < g_score[next] {
     g_score[next] = tentative
     parent[next] = current
@@ -400,7 +421,7 @@ fn Grid::relax_grid_neighbor_by_cost(
     return
   }
   let next = self.index(next_point)
-  let tentative = dist[current] + 1
+  let tentative = dist[current] + self.cost_at(next_point)
   if tentative < dist[next] {
     dist[next] = tentative
     parent[next] = current

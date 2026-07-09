@@ -69,3 +69,23 @@ test "grid dijkstra avoids blocked cells" {
   inspect(result.found, content="true")
   inspect(result.cost, content="10")
 }
+
+test "grid dijkstra avoids expensive terrain" {
+  let grid = Grid::new(3, 3)
+  grid.set_cost(Point::{ x: 1, y: 0 }, 10)
+
+  let result = grid.dijkstra(Point::{ x: 0, y: 0 }, Point::{ x: 2, y: 0 })
+  inspect(result.found, content="true")
+  inspect(result.cost, content="4")
+  inspect(result.path.length(), content="5")
+}
+
+test "grid astar avoids expensive terrain" {
+  let grid = Grid::new(3, 3)
+  grid.set_cost(Point::{ x: 1, y: 0 }, 10)
+
+  let result = grid.astar(Point::{ x: 0, y: 0 }, Point::{ x: 2, y: 0 })
+  inspect(result.found, content="true")
+  inspect(result.cost, content="4")
+  inspect(result.path.length(), content="5")
+}
