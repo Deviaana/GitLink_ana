@@ -27,6 +27,21 @@ test "graph has_path detects unreachable node" {
   inspect(graph.has_path(0, 3), content="false")
 }
 
+test "graph reachable_count counts reachable nodes" {
+  let graph = Graph::new(5)
+  graph.add_edge(0, 1, 1)
+  graph.add_edge(1, 2, 1)
+  graph.add_edge(3, 4, 1)
+
+  inspect(graph.reachable_count(0), content="3")
+}
+
+test "graph reachable_count rejects invalid start" {
+  let graph = Graph::new(3)
+
+  inspect(graph.reachable_count(9), content="0")
+}
+
 test "dijkstra prefers cheaper weighted path" {
   let graph = Graph::new(4)
   graph.add_edge(0, 1, 10)
