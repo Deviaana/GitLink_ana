@@ -1,0 +1,14 @@
+# MoonBit build outputs
+_build/
+
+# Editor and OS files
+.vscode/
+.idea/
+*.swp
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Local environment files
+.env
+.env.*
