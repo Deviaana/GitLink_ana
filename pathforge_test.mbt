@@ -37,6 +37,17 @@ test "grid astar avoids blocked cells" {
   inspect(result.cost, content="10")
 }
 
+test "grid bfs finds shortest unweighted path" {
+  let grid = Grid::new(5, 5)
+  grid.set_blocked(Point::{ x: 1, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 1 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 2 }, true)
+
+  let result = grid.bfs(Point::{ x: 0, y: 0 }, Point::{ x: 4, y: 0 })
+  inspect(result.found, content="true")
+  inspect(result.cost, content="10")
+}
+
 test "grid dijkstra avoids blocked cells" {
   let grid = Grid::new(5, 5)
   grid.set_blocked(Point::{ x: 1, y: 0 }, true)

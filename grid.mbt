@@ -103,6 +103,52 @@ pub fn Grid::astar(self : Grid, start : Point, goal : Point) -> PathReport {
   PathReport::not_found(visited)
 }
 
+pub fn Grid::bfs(self : Grid, start : Point, goal : Point) -> PathReport {
+  guard self.inside(start) && self.inside(goal) else {
+    return PathReport::not_found(0)
+  }
+  guard !self.is_blocked(start) && !self.is_blocked(goal) else {
+    return PathReport::not_found(0)
+  }
+
+  let start_id = self.index(start)
+  let goal_id = self.index(goal)
+  if start_id == goal_id {
+    return PathReport::single(start_id)
+  }
+
+  let total = self.width * self.height
+  let queue = [start_id]
+  let seen = Array::make(total, false)
+  let parent = Array::make(total, -1)
+  let mut head = 0
+  let mut visited = 0
+
+  seen[start_id] = true
+
+  while head < queue.length() {
+    let current = queue[head]
+    head = head + 1
+    visited = visited + 1
+
+    let p = self.point(current)
+    if self.enqueue_grid_neighbor(queue, seen, parent, current, Point::{ x: p.x + 1, y: p.y }, goal_id) {
+      return PathReport::success(grid_steps(parent, start_id, goal_id), visited, grid_rebuild(parent, start_id, goal_id))
+    }
+    if self.enqueue_grid_neighbor(queue, seen, parent, current, Point::{ x: p.x - 1, y: p.y }, goal_id) {
+      return PathReport::success(grid_steps(parent, start_id, goal_id), visited, grid_rebuild(parent, start_id, goal_id))
+    }
+    if self.enqueue_grid_neighbor(queue, seen, parent, current, Point::{ x: p.x, y: p.y + 1 }, goal_id) {
+      return PathReport::success(grid_steps(parent, start_id, goal_id), visited, grid_rebuild(parent, start_id, goal_id))
+    }
+    if self.enqueue_grid_neighbor(queue, seen, parent, current, Point::{ x: p.x, y: p.y - 1 }, goal_id) {
+      return PathReport::success(grid_steps(parent, start_id, goal_id), visited, grid_rebuild(parent, start_id, goal_id))
+    }
+  }
+
+  PathReport::not_found(visited)
+}
+
 pub fn Grid::dijkstra(self : Grid, start : Point, goal : Point) -> PathReport {
   guard self.inside(start) && self.inside(goal) else {
     return PathReport::not_found(0)
@@ -159,6 +205,31 @@ fn Grid::connect_if_open(self : Grid, graph : Graph, from : Point, to : Point) -
   if self.inside(to) && !self.is_blocked(to) {
     graph.add_edge(self.index(from), self.index(to), 1)
   }
+}
+
+fn Grid::enqueue_grid_neighbor(
+  self : Grid,
+  queue : Array[Int],
+  seen : Array[Bool],
+  parent : Array[Int],
+  current : Int,
+  next_point : Point,
+  goal : Int
+) -> Bool {
+  if self.is_blocked(next_point) {
+    return false
+  }
+  let next = self.index(next_point)
+  if seen[next] {
+    return false
+  }
+  seen[next] = true
+  parent[next] = current
+  if next == goal {
+    return true
+  }
+  queue.push(next)
+  false
 }
 
 fn Grid::relax_grid_neighbor(
@@ -226,6 +297,16 @@ fn grid_reverse(items : Array[Int]) -> Array[Int] {
     i = i - 1
   }
   result
+}
+
+fn grid_steps(parent : Array[Int], start : Int, goal : Int) -> Int {
+  let mut count = 0
+  let mut current = goal
+  while current != start && current != -1 {
+    count = count + 1
+    current = parent[current]
+  }
+  count
 }
 
 fn manhattan(a : Point, b : Point) -> Int {
