@@ -57,10 +57,13 @@ pub fn Graph::bfs(self : Graph, start : Int, goal : Int) -> PathReport {
     return PathReport::single(start)
   }
 
+  // BFS explores nodes level by level, so the first time we reach the goal
+  // is the shortest path measured by hop count.
   let n = self.node_count()
   let queue = [start]
   let mut head = 0
   let seen = Array::make(n, false)
+  // parent keeps the previous node for rebuilding the final path.
   let parent = Array::make(n, -1)
   let mut visited = 0
   seen[start] = true
@@ -94,9 +97,11 @@ pub fn Graph::dijkstra(self : Graph, start : Int, goal : Int) -> PathReport {
     return PathReport::single(start)
   }
 
+  // Dijkstra always expands the unvisited node with the lowest known cost.
   let n = self.node_count()
   let inf = 1_000_000_000
   let dist = Array::make(n, inf)
+  // parent records the cheapest predecessor discovered for each node.
   let parent = Array::make(n, -1)
   let visited = Array::make(n, false)
   let mut count = 0
@@ -143,6 +148,8 @@ pub fn Graph::astar(
     return PathReport::single(start)
   }
 
+  // A* uses g_score for the known path cost and the heuristic for direction.
+  // A priority is therefore: known cost + estimated remaining cost.
   let n = self.node_count()
   let inf = 1_000_000_000
   let g_score = Array::make(n, inf)
@@ -183,6 +190,7 @@ pub fn Graph::astar(
 fn rebuild(parent : Array[Int], start : Int, goal : Int) -> Array[Int] {
   let path : Array[Int] = []
   let mut current = goal
+  // Walk backward through parent links, then reverse to get start -> goal.
   while current != -1 {
     path.push(current)
     if current == start {

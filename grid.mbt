@@ -58,12 +58,49 @@ pub fn Grid::astar(self : Grid, start : Point, goal : Point) -> PathReport {
   guard !self.is_blocked(start) && !self.is_blocked(goal) else {
     return PathReport::not_found(0)
   }
-  let graph = self.to_graph()
-  graph.astar(self.index(start), self.index(goal), fn(a, b) {
-    let pa = self.point(a)
-    let pb = self.point(b)
-    abs(pa.x - pb.x) + abs(pa.y - pb.y)
-  })
+
+  let start_id = self.index(start)
+  let goal_id = self.index(goal)
+  if start_id == goal_id {
+    return PathReport::single(start_id)
+  }
+
+  let total = self.width * self.height
+  let inf = 1_000_000_000
+  let g_score = Array::make(total, inf)
+  let parent = Array::make(total, -1)
+  let closed = Array::make(total, false)
+  let open = PriorityQueue::new()
+  let mut visited = 0
+
+  g_score[start_id] = 0
+  open.push(start_id, manhattan(start, goal))
+
+  while !open.is_empty() {
+    let item = open.pop().unwrap()
+    let current = item.node
+    if closed[current] {
+      continue
+    }
+    closed[current] = true
+    visited = visited + 1
+
+    if current == goal_id {
+      return PathReport::success(
+        g_score[goal_id],
+        visited,
+        grid_rebuild(parent, start_id, goal_id),
+      )
+    }
+
+    let p = self.point(current)
+    self.relax_grid_neighbor(open, g_score, parent, current, Point::{ x: p.x + 1, y: p.y }, goal)
+    self.relax_grid_neighbor(open, g_score, parent, current, Point::{ x: p.x - 1, y: p.y }, goal)
+    self.relax_grid_neighbor(open, g_score, parent, current, Point::{ x: p.x, y: p.y + 1 }, goal)
+    self.relax_grid_neighbor(open, g_score, parent, current, Point::{ x: p.x, y: p.y - 1 }, goal)
+  }
+
+  PathReport::not_found(visited)
 }
 
 pub fn Grid::dijkstra(self : Grid, start : Point, goal : Point) -> PathReport {
@@ -78,6 +115,57 @@ fn Grid::connect_if_open(self : Grid, graph : Graph, from : Point, to : Point) -
   if self.inside(to) && !self.is_blocked(to) {
     graph.add_edge(self.index(from), self.index(to), 1)
   }
+}
+
+fn Grid::relax_grid_neighbor(
+  self : Grid,
+  open : PriorityQueue,
+  g_score : Array[Int],
+  parent : Array[Int],
+  current : Int,
+  next_point : Point,
+  goal : Point
+) -> Unit {
+  if self.is_blocked(next_point) {
+    return
+  }
+  let next = self.index(next_point)
+  let tentative = g_score[current] + 1
+  if tentative < g_score[next] {
+    g_score[next] = tentative
+    parent[next] = current
+    open.push(next, tentative + manhattan(next_point, goal))
+  }
+}
+
+fn grid_rebuild(parent : Array[Int], start : Int, goal : Int) -> Array[Int] {
+  let path : Array[Int] = []
+  let mut current = goal
+  while current != -1 {
+    path.push(current)
+    if current == start {
+      break
+    }
+    current = parent[current]
+  }
+  grid_reverse(path)
+}
+
+fn grid_reverse(items : Array[Int]) -> Array[Int] {
+  let result : Array[Int] = []
+  let mut i = items.length() - 1
+  while i >= 0 {
+    result.push(items[i])
+    if i == 0 {
+      break
+    }
+    i = i - 1
+  }
+  result
+}
+
+fn manhattan(a : Point, b : Point) -> Int {
+  abs(a.x - b.x) + abs(a.y - b.y)
 }
 
 fn abs(value : Int) -> Int {
