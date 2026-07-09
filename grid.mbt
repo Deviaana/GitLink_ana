@@ -178,75 +178,79 @@ pub fn Grid::bidirectional_bfs(self : Grid, start : Point, goal : Point) -> Path
   seen_goal[goal_id] = true
 
   while start_head < start_queue.length() && goal_head < goal_queue.length() {
-    let start_level_end = start_queue.length()
-    while start_head < start_level_end {
-      let current = start_queue[start_head]
-      start_head = start_head + 1
-      visited = visited + 1
-      let p = self.point(current)
-      let meet_right = self.enqueue_bidirectional_neighbor(
-        start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x + 1, y: p.y },
-      )
-      if meet_right != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_right)
-        return PathReport::success(path.length() - 1, visited, path)
+    let start_frontier = start_queue.length() - start_head
+    let goal_frontier = goal_queue.length() - goal_head
+    if start_frontier <= goal_frontier {
+      let start_level_end = start_queue.length()
+      while start_head < start_level_end {
+        let current = start_queue[start_head]
+        start_head = start_head + 1
+        visited = visited + 1
+        let p = self.point(current)
+        let meet_right = self.enqueue_bidirectional_neighbor(
+          start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x + 1, y: p.y },
+        )
+        if meet_right != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_right)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
+        let meet_left = self.enqueue_bidirectional_neighbor(
+          start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x - 1, y: p.y },
+        )
+        if meet_left != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_left)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
+        let meet_down = self.enqueue_bidirectional_neighbor(
+          start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x, y: p.y + 1 },
+        )
+        if meet_down != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_down)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
+        let meet_up = self.enqueue_bidirectional_neighbor(
+          start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x, y: p.y - 1 },
+        )
+        if meet_up != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_up)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
       }
-      let meet_left = self.enqueue_bidirectional_neighbor(
-        start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x - 1, y: p.y },
-      )
-      if meet_left != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_left)
-        return PathReport::success(path.length() - 1, visited, path)
-      }
-      let meet_down = self.enqueue_bidirectional_neighbor(
-        start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x, y: p.y + 1 },
-      )
-      if meet_down != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_down)
-        return PathReport::success(path.length() - 1, visited, path)
-      }
-      let meet_up = self.enqueue_bidirectional_neighbor(
-        start_queue, seen_start, seen_goal, parent_start, current, Point::{ x: p.x, y: p.y - 1 },
-      )
-      if meet_up != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_up)
-        return PathReport::success(path.length() - 1, visited, path)
-      }
-    }
-
-    let goal_level_end = goal_queue.length()
-    while goal_head < goal_level_end {
-      let current = goal_queue[goal_head]
-      goal_head = goal_head + 1
-      visited = visited + 1
-      let p = self.point(current)
-      let meet_right = self.enqueue_bidirectional_neighbor(
-        goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x + 1, y: p.y },
-      )
-      if meet_right != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_right)
-        return PathReport::success(path.length() - 1, visited, path)
-      }
-      let meet_left = self.enqueue_bidirectional_neighbor(
-        goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x - 1, y: p.y },
-      )
-      if meet_left != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_left)
-        return PathReport::success(path.length() - 1, visited, path)
-      }
-      let meet_down = self.enqueue_bidirectional_neighbor(
-        goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x, y: p.y + 1 },
-      )
-      if meet_down != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_down)
-        return PathReport::success(path.length() - 1, visited, path)
-      }
-      let meet_up = self.enqueue_bidirectional_neighbor(
-        goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x, y: p.y - 1 },
-      )
-      if meet_up != -1 {
-        let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_up)
-        return PathReport::success(path.length() - 1, visited, path)
+    } else {
+      let goal_level_end = goal_queue.length()
+      while goal_head < goal_level_end {
+        let current = goal_queue[goal_head]
+        goal_head = goal_head + 1
+        visited = visited + 1
+        let p = self.point(current)
+        let meet_right = self.enqueue_bidirectional_neighbor(
+          goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x + 1, y: p.y },
+        )
+        if meet_right != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_right)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
+        let meet_left = self.enqueue_bidirectional_neighbor(
+          goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x - 1, y: p.y },
+        )
+        if meet_left != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_left)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
+        let meet_down = self.enqueue_bidirectional_neighbor(
+          goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x, y: p.y + 1 },
+        )
+        if meet_down != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_down)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
+        let meet_up = self.enqueue_bidirectional_neighbor(
+          goal_queue, seen_goal, seen_start, parent_goal, current, Point::{ x: p.x, y: p.y - 1 },
+        )
+        if meet_up != -1 {
+          let path = grid_rebuild_bidirectional(parent_start, parent_goal, start_id, meet_up)
+          return PathReport::success(path.length() - 1, visited, path)
+        }
       }
     }
   }
