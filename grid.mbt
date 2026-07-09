@@ -107,8 +107,52 @@ pub fn Grid::dijkstra(self : Grid, start : Point, goal : Point) -> PathReport {
   guard self.inside(start) && self.inside(goal) else {
     return PathReport::not_found(0)
   }
-  let graph = self.to_graph()
-  graph.dijkstra(self.index(start), self.index(goal))
+  guard !self.is_blocked(start) && !self.is_blocked(goal) else {
+    return PathReport::not_found(0)
+  }
+
+  let start_id = self.index(start)
+  let goal_id = self.index(goal)
+  if start_id == goal_id {
+    return PathReport::single(start_id)
+  }
+
+  let total = self.width * self.height
+  let inf = 1_000_000_000
+  let dist = Array::make(total, inf)
+  let parent = Array::make(total, -1)
+  let visited_nodes = Array::make(total, false)
+  let open = PriorityQueue::new()
+  let mut visited = 0
+
+  dist[start_id] = 0
+  open.push(start_id, 0)
+
+  while !open.is_empty() {
+    let item = open.pop().unwrap()
+    let current = item.node
+    if visited_nodes[current] {
+      continue
+    }
+    visited_nodes[current] = true
+    visited = visited + 1
+
+    if current == goal_id {
+      return PathReport::success(
+        dist[goal_id],
+        visited,
+        grid_rebuild(parent, start_id, goal_id),
+      )
+    }
+
+    let p = self.point(current)
+    self.relax_grid_neighbor_by_cost(open, dist, parent, current, Point::{ x: p.x + 1, y: p.y })
+    self.relax_grid_neighbor_by_cost(open, dist, parent, current, Point::{ x: p.x - 1, y: p.y })
+    self.relax_grid_neighbor_by_cost(open, dist, parent, current, Point::{ x: p.x, y: p.y + 1 })
+    self.relax_grid_neighbor_by_cost(open, dist, parent, current, Point::{ x: p.x, y: p.y - 1 })
+  }
+
+  PathReport::not_found(visited)
 }
 
 fn Grid::connect_if_open(self : Grid, graph : Graph, from : Point, to : Point) -> Unit {
@@ -135,6 +179,26 @@ fn Grid::relax_grid_neighbor(
     g_score[next] = tentative
     parent[next] = current
     open.push(next, tentative + manhattan(next_point, goal))
+  }
+}
+
+fn Grid::relax_grid_neighbor_by_cost(
+  self : Grid,
+  open : PriorityQueue,
+  dist : Array[Int],
+  parent : Array[Int],
+  current : Int,
+  next_point : Point
+) -> Unit {
+  if self.is_blocked(next_point) {
+    return
+  }
+  let next = self.index(next_point)
+  let tentative = dist[current] + 1
+  if tentative < dist[next] {
+    dist[next] = tentative
+    parent[next] = current
+    open.push(next, tentative)
   }
 }
 
