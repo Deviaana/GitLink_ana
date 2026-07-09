@@ -12,6 +12,21 @@ test "bfs finds shortest hop path" {
   inspect(result.path.length(), content="3")
 }
 
+test "graph has_path detects reachable node" {
+  let graph = Graph::new(4)
+  graph.add_edge(0, 1, 1)
+  graph.add_edge(1, 2, 1)
+
+  inspect(graph.has_path(0, 2), content="true")
+}
+
+test "graph has_path detects unreachable node" {
+  let graph = Graph::new(4)
+  graph.add_edge(0, 1, 1)
+
+  inspect(graph.has_path(0, 3), content="false")
+}
+
 test "dijkstra prefers cheaper weighted path" {
   let graph = Graph::new(4)
   graph.add_edge(0, 1, 10)

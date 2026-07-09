@@ -49,6 +49,38 @@ pub fn Graph::in_bounds(self : Graph, node : Int) -> Bool {
   node >= 0 && node < self.adj.length()
 }
 
+pub fn Graph::has_path(self : Graph, start : Int, goal : Int) -> Bool {
+  guard self.in_bounds(start) && self.in_bounds(goal) else {
+    return false
+  }
+  if start == goal {
+    return true
+  }
+
+  let queue = [start]
+  let seen = Array::make(self.node_count(), false)
+  let mut head = 0
+  seen[start] = true
+
+  while head < queue.length() {
+    let current = queue[head]
+    head = head + 1
+
+    for edge in self.neighbors(current) {
+      let next = edge.to
+      if next == goal {
+        return true
+      }
+      if !seen[next] {
+        seen[next] = true
+        queue.push(next)
+      }
+    }
+  }
+
+  false
+}
+
 pub fn Graph::bfs(self : Graph, start : Int, goal : Int) -> PathReport {
   guard self.in_bounds(start) && self.in_bounds(goal) else {
     return PathReport::not_found(0)
