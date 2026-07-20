@@ -20,7 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       COVERAGE_MIN: "65"
-      MOONBIT_VERSION: "0.1.20260703"
 
     steps:
       - name: Checkout
@@ -36,7 +35,7 @@ jobs:
 
       - name: Install MoonBit
         run: |
-          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash -s "$MOONBIT_VERSION"
+          /bin/bash -c "$(curl -fsSL https://cli.moonbitlang.com/install/unix.sh)"
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
 
       - name: Show toolchain
