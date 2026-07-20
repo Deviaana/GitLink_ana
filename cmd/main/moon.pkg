@@ -1,5 +1,5 @@
 import {
-  "gitlink/pathforge",
+  "Deviaana/pathforge",
 }
 
 pkgtype(kind: "executable")

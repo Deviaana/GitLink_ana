@@ -1,4 +1,4 @@
-name = "gitlink/pathforge"
+name = "Deviaana/pathforge"
 
 version = "0.1.0"
 

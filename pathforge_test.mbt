@@ -85,6 +85,37 @@ test "graph astar reopens nodes for inconsistent heuristic" {
 }
 
 ///|
+test "graph astar returns single-node path when start equals goal" {
+  let graph = Graph::new(3)
+
+  fn zero(_node : Int, _goal : Int) -> Int {
+    0
+  }
+
+  let result = graph.astar(1, 1, zero)
+  inspect(result.found, content="true")
+  inspect(result.cost, content="0")
+  inspect(result.path.length(), content="1")
+}
+
+///|
+test "graph astar rejects invalid endpoints" {
+  let graph = Graph::new(3)
+
+  fn zero(_node : Int, _goal : Int) -> Int {
+    0
+  }
+
+  let invalid_start = graph.astar(-1, 2, zero)
+  inspect(invalid_start.found, content="false")
+  inspect(invalid_start.visited, content="0")
+
+  let invalid_goal = graph.astar(0, 9, zero)
+  inspect(invalid_goal.found, content="false")
+  inspect(invalid_goal.visited, content="0")
+}
+
+///|
 test "grid astar avoids blocked cells" {
   let grid = Grid::new(5, 5)
   grid.set_blocked(Point::{ x: 1, y: 0 }, true)
