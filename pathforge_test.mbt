@@ -1,3 +1,4 @@
+///|
 test "bfs finds shortest hop path" {
   let graph = Graph::new(5)
   graph.add_undirected_edge(0, 1, 1)
@@ -12,6 +13,7 @@ test "bfs finds shortest hop path" {
   inspect(result.path.length(), content="3")
 }
 
+///|
 test "graph has_path detects reachable node" {
   let graph = Graph::new(4)
   graph.add_edge(0, 1, 1)
@@ -20,6 +22,7 @@ test "graph has_path detects reachable node" {
   inspect(graph.has_path(0, 2), content="true")
 }
 
+///|
 test "graph has_path detects unreachable node" {
   let graph = Graph::new(4)
   graph.add_edge(0, 1, 1)
@@ -27,6 +30,7 @@ test "graph has_path detects unreachable node" {
   inspect(graph.has_path(0, 3), content="false")
 }
 
+///|
 test "graph reachable_count counts reachable nodes" {
   let graph = Graph::new(5)
   graph.add_edge(0, 1, 1)
@@ -36,12 +40,14 @@ test "graph reachable_count counts reachable nodes" {
   inspect(graph.reachable_count(0), content="3")
 }
 
+///|
 test "graph reachable_count rejects invalid start" {
   let graph = Graph::new(3)
 
   inspect(graph.reachable_count(9), content="0")
 }
 
+///|
 test "dijkstra prefers cheaper weighted path" {
   let graph = Graph::new(4)
   graph.add_edge(0, 1, 10)
@@ -56,6 +62,29 @@ test "dijkstra prefers cheaper weighted path" {
   inspect(result.path.length(), content="4")
 }
 
+///|
+test "graph astar reopens nodes for inconsistent heuristic" {
+  let graph = Graph::new(4)
+  graph.add_edge(0, 1, 5)
+  graph.add_edge(0, 2, 4)
+  graph.add_edge(2, 1, 0)
+  graph.add_edge(1, 3, 10)
+
+  fn heuristic(node : Int, _goal : Int) -> Int {
+    if node == 2 {
+      10
+    } else {
+      0
+    }
+  }
+
+  let result = graph.astar(0, 3, heuristic)
+  inspect(result.found, content="true")
+  inspect(result.cost, content="14")
+  inspect(result.path.length(), content="4")
+}
+
+///|
 test "grid astar avoids blocked cells" {
   let grid = Grid::new(5, 5)
   grid.set_blocked(Point::{ x: 1, y: 0 }, true)
@@ -67,6 +96,7 @@ test "grid astar avoids blocked cells" {
   inspect(result.cost, content="10")
 }
 
+///|
 test "grid bfs finds shortest unweighted path" {
   let grid = Grid::new(5, 5)
   grid.set_blocked(Point::{ x: 1, y: 0 }, true)
@@ -78,17 +108,22 @@ test "grid bfs finds shortest unweighted path" {
   inspect(result.cost, content="10")
 }
 
+///|
 test "grid bidirectional bfs finds shortest unweighted path" {
   let grid = Grid::new(5, 5)
   grid.set_blocked(Point::{ x: 1, y: 0 }, true)
   grid.set_blocked(Point::{ x: 1, y: 1 }, true)
   grid.set_blocked(Point::{ x: 1, y: 2 }, true)
 
-  let result = grid.bidirectional_bfs(Point::{ x: 0, y: 0 }, Point::{ x: 4, y: 0 })
+  let result = grid.bidirectional_bfs(Point::{ x: 0, y: 0 }, Point::{
+    x: 4,
+    y: 0,
+  })
   inspect(result.found, content="true")
   inspect(result.cost, content="10")
 }
 
+///|
 test "grid dijkstra avoids blocked cells" {
   let grid = Grid::new(5, 5)
   grid.set_blocked(Point::{ x: 1, y: 0 }, true)
@@ -100,6 +135,7 @@ test "grid dijkstra avoids blocked cells" {
   inspect(result.cost, content="10")
 }
 
+///|
 test "grid dijkstra avoids expensive terrain" {
   let grid = Grid::new(3, 3)
   grid.set_cost(Point::{ x: 1, y: 0 }, 10)
@@ -110,6 +146,7 @@ test "grid dijkstra avoids expensive terrain" {
   inspect(result.path.length(), content="5")
 }
 
+///|
 test "grid astar avoids expensive terrain" {
   let grid = Grid::new(3, 3)
   grid.set_cost(Point::{ x: 1, y: 0 }, 10)

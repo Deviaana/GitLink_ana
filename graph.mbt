@@ -1,42 +1,53 @@
+///|
 pub(all) struct Edge {
   to : Int
   cost : Int
 }
 
+///|
 pub(all) struct Graph {
   mut adj : Array[Array[Edge]]
 }
 
+///|
 pub fn Graph::new(size : Int) -> Graph {
   let adj : Array[Array[Edge]] = []
   for _ in 0..<size {
     adj.push([])
   }
-  Graph::{ adj }
+  Graph::{ adj, }
 }
 
+///|
 pub fn Graph::node_count(self : Graph) -> Int {
   self.adj.length()
 }
 
+///|
 pub fn Graph::add_node(self : Graph) -> Int {
   let id = self.adj.length()
   self.adj.push([])
   id
 }
 
+///|
 pub fn Graph::add_edge(self : Graph, from : Int, to : Int, cost : Int) -> Unit {
-  guard self.in_bounds(from) && self.in_bounds(to) && cost >= 0 else {
-    return
-  }
+  guard self.in_bounds(from) && self.in_bounds(to) && cost >= 0 else { return }
   self.adj[from].push(Edge::{ to, cost })
 }
 
-pub fn Graph::add_undirected_edge(self : Graph, a : Int, b : Int, cost : Int) -> Unit {
+///|
+pub fn Graph::add_undirected_edge(
+  self : Graph,
+  a : Int,
+  b : Int,
+  cost : Int,
+) -> Unit {
   self.add_edge(a, b, cost)
   self.add_edge(b, a, cost)
 }
 
+///|
 pub fn Graph::neighbors(self : Graph, node : Int) -> Array[Edge] {
   if self.in_bounds(node) {
     self.adj[node]
@@ -45,14 +56,14 @@ pub fn Graph::neighbors(self : Graph, node : Int) -> Array[Edge] {
   }
 }
 
+///|
 pub fn Graph::in_bounds(self : Graph, node : Int) -> Bool {
   node >= 0 && node < self.adj.length()
 }
 
+///|
 pub fn Graph::has_path(self : Graph, start : Int, goal : Int) -> Bool {
-  guard self.in_bounds(start) && self.in_bounds(goal) else {
-    return false
-  }
+  guard self.in_bounds(start) && self.in_bounds(goal) else { return false }
   if start == goal {
     return true
   }
@@ -81,10 +92,9 @@ pub fn Graph::has_path(self : Graph, start : Int, goal : Int) -> Bool {
   false
 }
 
+///|
 pub fn Graph::reachable_count(self : Graph, start : Int) -> Int {
-  guard self.in_bounds(start) else {
-    return 0
-  }
+  guard self.in_bounds(start) else { return 0 }
 
   let queue = [start]
   let seen = Array::make(self.node_count(), false)
@@ -109,6 +119,7 @@ pub fn Graph::reachable_count(self : Graph, start : Int) -> Int {
   count
 }
 
+///|
 pub fn Graph::bfs(self : Graph, start : Int, goal : Int) -> PathReport {
   guard self.in_bounds(start) && self.in_bounds(goal) else {
     return PathReport::not_found(0)
@@ -139,7 +150,11 @@ pub fn Graph::bfs(self : Graph, start : Int, goal : Int) -> PathReport {
         seen[next] = true
         parent[next] = current
         if next == goal {
-          return PathReport::success(steps(parent, start, goal), visited, rebuild(parent, start, goal))
+          return PathReport::success(
+            steps(parent, start, goal),
+            visited,
+            rebuild(parent, start, goal),
+          )
         }
         queue.push(next)
       }
@@ -149,6 +164,7 @@ pub fn Graph::bfs(self : Graph, start : Int, goal : Int) -> PathReport {
   PathReport::not_found(visited)
 }
 
+///|
 pub fn Graph::dijkstra(self : Graph, start : Int, goal : Int) -> PathReport {
   guard self.in_bounds(start) && self.in_bounds(goal) else {
     return PathReport::not_found(0)
@@ -178,7 +194,11 @@ pub fn Graph::dijkstra(self : Graph, start : Int, goal : Int) -> PathReport {
     visited[current] = true
     count = count + 1
     if current == goal {
-      return PathReport::success(dist[goal], count, rebuild(parent, start, goal))
+      return PathReport::success(
+        dist[goal],
+        count,
+        rebuild(parent, start, goal),
+      )
     }
 
     for edge in self.neighbors(current) {
@@ -195,11 +215,12 @@ pub fn Graph::dijkstra(self : Graph, start : Int, goal : Int) -> PathReport {
   PathReport::not_found(count)
 }
 
+///|
 pub fn Graph::astar(
   self : Graph,
   start : Int,
   goal : Int,
-  heuristic : (Int, Int) -> Int
+  heuristic : (Int, Int) -> Int,
 ) -> PathReport {
   guard self.in_bounds(start) && self.in_bounds(goal) else {
     return PathReport::not_found(0)
@@ -223,6 +244,9 @@ pub fn Graph::astar(
   while !open.is_empty() {
     let item = open.pop().unwrap()
     let current = item.node
+    if item.priority != g_score[current] + heuristic(current, goal) {
+      continue
+    }
     if closed[current] {
       continue
     }
@@ -230,7 +254,11 @@ pub fn Graph::astar(
     count = count + 1
 
     if current == goal {
-      return PathReport::success(g_score[goal], count, rebuild(parent, start, goal))
+      return PathReport::success(
+        g_score[goal],
+        count,
+        rebuild(parent, start, goal),
+      )
     }
 
     for edge in self.neighbors(current) {
@@ -239,6 +267,7 @@ pub fn Graph::astar(
       if tentative < g_score[next] {
         g_score[next] = tentative
         parent[next] = current
+        closed[next] = false
         open.push(next, tentative + heuristic(next, goal))
       }
     }
@@ -247,6 +276,7 @@ pub fn Graph::astar(
   PathReport::not_found(count)
 }
 
+///|
 fn rebuild(parent : Array[Int], start : Int, goal : Int) -> Array[Int] {
   let path : Array[Int] = []
   let mut current = goal
@@ -261,6 +291,7 @@ fn rebuild(parent : Array[Int], start : Int, goal : Int) -> Array[Int] {
   reverse(path)
 }
 
+///|
 fn reverse(items : Array[Int]) -> Array[Int] {
   let result : Array[Int] = []
   let mut i = items.length() - 1
@@ -274,6 +305,7 @@ fn reverse(items : Array[Int]) -> Array[Int] {
   result
 }
 
+///|
 fn steps(parent : Array[Int], start : Int, goal : Int) -> Int {
   let mut count = 0
   let mut current = goal

@@ -1,30 +1,41 @@
+///|
 pub(all) struct QueueItem {
   node : Int
   priority : Int
 }
 
+///|
 pub(all) struct PriorityQueue {
   mut data : Array[QueueItem]
 }
 
+///|
 pub fn PriorityQueue::new() -> PriorityQueue {
   PriorityQueue::{ data: [] }
 }
 
+///|
 pub fn PriorityQueue::is_empty(self : PriorityQueue) -> Bool {
   self.data.length() == 0
 }
 
+///|
 pub fn PriorityQueue::length(self : PriorityQueue) -> Int {
   self.data.length()
 }
 
-pub fn PriorityQueue::push(self : PriorityQueue, node : Int, priority : Int) -> Unit {
+///|
+pub fn PriorityQueue::push(
+  self : PriorityQueue,
+  node : Int,
+  priority : Int,
+) -> Unit {
   self.data.push(QueueItem::{ node, priority })
   self.bubble_up(self.data.length() - 1)
 }
 
-pub fn PriorityQueue::pop(self : PriorityQueue) -> Option[QueueItem] {
+///|
+pub fn PriorityQueue::pop(self : PriorityQueue) -> QueueItem? {
   let len = self.data.length()
   if len == 0 {
     None
@@ -39,6 +50,7 @@ pub fn PriorityQueue::pop(self : PriorityQueue) -> Option[QueueItem] {
   }
 }
 
+///|
 fn PriorityQueue::bubble_up(self : PriorityQueue, index : Int) -> Unit {
   let mut cursor = index
   while cursor > 0 {
@@ -51,6 +63,7 @@ fn PriorityQueue::bubble_up(self : PriorityQueue, index : Int) -> Unit {
   }
 }
 
+///|
 fn PriorityQueue::bubble_down(self : PriorityQueue, index : Int) -> Unit {
   let mut cursor = index
   let len = self.data.length()
@@ -73,6 +86,7 @@ fn PriorityQueue::bubble_down(self : PriorityQueue, index : Int) -> Unit {
   }
 }
 
+///|
 fn PriorityQueue::swap(self : PriorityQueue, a : Int, b : Int) -> Unit {
   let tmp = self.data[a]
   self.data[a] = self.data[b]

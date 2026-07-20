@@ -1,0 +1,68 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: MoonBit check, test, coverage, package
+    runs-on: ubuntu-latest
+    env:
+      COVERAGE_MIN: "65"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache MoonBit build output
+        uses: actions/cache@v4
+        with:
+          path: _build
+          key: ${{ runner.os }}-moon-build-${{ hashFiles('moon.mod', 'moon.pkg', 'cmd/main/moon.pkg', '**/*.mbt') }}
+          restore-keys: |
+            ${{ runner.os }}-moon-build-
+
+      - name: Install MoonBit
+        run: |
+          /bin/bash -c "$(curl -fsSL https://cli.moonbitlang.com/install/unix.sh)"
+          echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+
+      - name: Show toolchain
+        run: moon version --all
+
+      - name: Format
+        run: moon fmt --check
+
+      - name: Check
+        run: moon check --deny-warn
+
+      - name: Build
+        run: moon build
+
+      - name: Test
+        run: moon test
+
+      - name: Coverage
+        run: |
+          set -euo pipefail
+          moon coverage analyze -- -f summary | tee coverage-summary.txt
+          total_line="$(grep '^Total:' coverage-summary.txt)"
+          covered="$(printf '%s\n' "$total_line" | awk '{split($2, a, "/"); print a[1]}')"
+          total="$(printf '%s\n' "$total_line" | awk '{split($2, a, "/"); print a[2]}')"
+          percent="$(awk -v covered="$covered" -v total="$total" 'BEGIN { printf "%.2f", covered * 100 / total }')"
+          echo "Coverage: ${percent}% (${covered}/${total}), required: ${COVERAGE_MIN}%"
+          awk -v actual="$percent" -v required="$COVERAGE_MIN" 'BEGIN { exit(actual >= required ? 0 : 1) }'
+
+      - name: Package
+        run: moon package

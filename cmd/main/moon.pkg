@@ -1,0 +1,7 @@
+import {
+  "gitlink/pathforge",
+}
+
+options(
+  "is-main": true,
+)
