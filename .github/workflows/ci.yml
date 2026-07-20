@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       COVERAGE_MIN: "65"
-      MOONBIT_VERSION: "0.1.20260703+6fbf8c3"
+      MOONBIT_VERSION: "0.1.20260703"
 
     steps:
       - name: Checkout
