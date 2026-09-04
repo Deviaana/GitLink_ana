@@ -223,7 +223,10 @@ test "grid has_path detects reachable node" {
   grid.set_blocked(Point::{ x: 1, y: 0 }, true)
   grid.set_blocked(Point::{ x: 1, y: 1 }, true)
 
-  inspect(grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 3, y: 0 }), content="true")
+  inspect(
+    grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 3, y: 0 }),
+    content="true",
+  )
 }
 
 ///|
@@ -233,15 +236,24 @@ test "grid has_path detects unreachable node" {
   grid.set_blocked(Point::{ x: 1, y: 1 }, true)
   grid.set_blocked(Point::{ x: 1, y: 2 }, true)
 
-  inspect(grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 2, y: 0 }), content="false")
+  inspect(
+    grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 2, y: 0 }),
+    content="false",
+  )
 }
 
 ///|
 test "grid has_path rejects invalid endpoints" {
   let grid = Grid::new(3, 3)
 
-  inspect(grid.has_path(Point::{ x: -1, y: 0 }, Point::{ x: 2, y: 2 }), content="false")
-  inspect(grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 9, y: 9 }), content="false")
+  inspect(
+    grid.has_path(Point::{ x: -1, y: 0 }, Point::{ x: 2, y: 2 }),
+    content="false",
+  )
+  inspect(
+    grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 9, y: 9 }),
+    content="false",
+  )
 }
 
 ///|
@@ -257,7 +269,10 @@ test "grid set_cost ignores invalid input" {
 test "grid dijkstra rejects invalid endpoints" {
   let grid = Grid::new(3, 3)
 
-  let invalid_start = grid.dijkstra(Point::{ x: -1, y: 0 }, Point::{ x: 2, y: 2 })
+  let invalid_start = grid.dijkstra(Point::{ x: -1, y: 0 }, Point::{
+    x: 2,
+    y: 2,
+  })
   inspect(invalid_start.found, content="false")
   inspect(invalid_start.visited, content="0")
   inspect(invalid_start.path.length(), content="0")

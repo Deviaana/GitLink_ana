@@ -85,12 +85,8 @@ pub fn Grid::to_graph(self : Grid) -> Graph {
 
 ///|
 pub fn Grid::has_path(self : Grid, start : Point, goal : Point) -> Bool {
-  guard self.inside(start) && self.inside(goal) else {
-    return false
-  }
-  guard !self.is_blocked(start) && !self.is_blocked(goal) else {
-    return false
-  }
+  guard self.inside(start) && self.inside(goal) else { return false }
+  guard !self.is_blocked(start) && !self.is_blocked(goal) else { return false }
 
   let start_id = self.index(start)
   let goal_id = self.index(goal)
@@ -112,33 +108,33 @@ pub fn Grid::has_path(self : Grid, start : Point, goal : Point) -> Bool {
     if self.enqueue_reachability_neighbor(
         queue,
         seen,
-      Point::{ x: p.x + 1, y: p.y },
-      goal_id,
-    ) {
+        Point::{ x: p.x + 1, y: p.y },
+        goal_id,
+      ) {
       return true
     }
     if self.enqueue_reachability_neighbor(
         queue,
         seen,
-      Point::{ x: p.x - 1, y: p.y },
-      goal_id,
-    ) {
+        Point::{ x: p.x - 1, y: p.y },
+        goal_id,
+      ) {
       return true
     }
     if self.enqueue_reachability_neighbor(
         queue,
         seen,
-      Point::{ x: p.x, y: p.y + 1 },
-      goal_id,
-    ) {
+        Point::{ x: p.x, y: p.y + 1 },
+        goal_id,
+      ) {
       return true
     }
     if self.enqueue_reachability_neighbor(
         queue,
         seen,
-      Point::{ x: p.x, y: p.y - 1 },
-      goal_id,
-    ) {
+        Point::{ x: p.x, y: p.y - 1 },
+        goal_id,
+      ) {
       return true
     }
   }

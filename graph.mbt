@@ -6,7 +6,7 @@ pub(all) struct Edge {
 
 ///|
 const INF_COST : Int = 1_000_000_000
- 
+
 ///|
 pub(all) struct Graph {
   mut adj : Array[Array[Edge]]
