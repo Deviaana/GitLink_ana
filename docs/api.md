@@ -42,9 +42,9 @@ PathForge provides graph search and grid pathfinding primitives for MoonBit.
 Every search returns `PathReport`.
 
 - `found : Bool`: whether a path was found.
-- `cost : Int`: total path cost, or `0` when not found.
-- `visited : Int`: number of expanded nodes.
-- `path : Array[Int]`: node ids from start to goal.
+- `cost : Int`: total path cost, or `0` when not found. For BFS, this is the hop count.
+- `visited : Int`: number of expanded nodes. For invalid endpoints, this is `0`.
+- `path : Array[Int]`: node ids from start to goal. For invalid endpoints or no path, this is empty.
 - `PathReport::length(self : PathReport) -> Int`: path length.
 - `PathReport::is_empty(self : PathReport) -> Bool`: whether `path` is empty.
 - `PathReport::first(self : PathReport) -> Option[Int]`: first node in the path.

@@ -48,6 +48,70 @@ test "graph reachable_count rejects invalid start" {
 }
 
 ///|
+test "graph add_edge ignores invalid input" {
+  let graph = Graph::new(3)
+  graph.add_edge(0, 1, 1)
+  graph.add_edge(-1, 1, 1)
+  graph.add_edge(1, 9, 1)
+  graph.add_edge(1, 2, -5)
+
+  inspect(graph.neighbors(0).length(), content="1")
+  inspect(graph.neighbors(1).length(), content="0")
+}
+
+///|
+test "graph bfs rejects invalid endpoints" {
+  let graph = Graph::new(3)
+
+  let invalid_start = graph.bfs(-1, 2)
+  inspect(invalid_start.found, content="false")
+  inspect(invalid_start.visited, content="0")
+  inspect(invalid_start.path.length(), content="0")
+
+  let invalid_goal = graph.bfs(0, 9)
+  inspect(invalid_goal.found, content="false")
+  inspect(invalid_goal.visited, content="0")
+  inspect(invalid_goal.path.length(), content="0")
+}
+
+///|
+test "graph bfs returns single-node path when start equals goal" {
+  let graph = Graph::new(3)
+
+  let result = graph.bfs(1, 1)
+  inspect(result.found, content="true")
+  inspect(result.cost, content="0")
+  inspect(result.visited, content="1")
+  inspect(result.path.length(), content="1")
+}
+
+///|
+test "graph dijkstra rejects invalid endpoints" {
+  let graph = Graph::new(3)
+
+  let invalid_start = graph.dijkstra(-1, 2)
+  inspect(invalid_start.found, content="false")
+  inspect(invalid_start.visited, content="0")
+  inspect(invalid_start.path.length(), content="0")
+
+  let invalid_goal = graph.dijkstra(0, 9)
+  inspect(invalid_goal.found, content="false")
+  inspect(invalid_goal.visited, content="0")
+  inspect(invalid_goal.path.length(), content="0")
+}
+
+///|
+test "graph dijkstra returns single-node path when start equals goal" {
+  let graph = Graph::new(3)
+
+  let result = graph.dijkstra(2, 2)
+  inspect(result.found, content="true")
+  inspect(result.cost, content="0")
+  inspect(result.visited, content="1")
+  inspect(result.path.length(), content="1")
+}
+
+///|
 test "dijkstra prefers cheaper weighted path" {
   let graph = Graph::new(4)
   graph.add_edge(0, 1, 10)
@@ -113,6 +177,147 @@ test "graph astar rejects invalid endpoints" {
   let invalid_goal = graph.astar(0, 9, zero)
   inspect(invalid_goal.found, content="false")
   inspect(invalid_goal.visited, content="0")
+}
+
+///|
+test "grid bfs rejects invalid endpoints" {
+  let grid = Grid::new(3, 3)
+
+  let invalid_start = grid.bfs(Point::{ x: -1, y: 0 }, Point::{ x: 2, y: 2 })
+  inspect(invalid_start.found, content="false")
+  inspect(invalid_start.visited, content="0")
+  inspect(invalid_start.path.length(), content="0")
+
+  let invalid_goal = grid.bfs(Point::{ x: 0, y: 0 }, Point::{ x: 9, y: 9 })
+  inspect(invalid_goal.found, content="false")
+  inspect(invalid_goal.visited, content="0")
+  inspect(invalid_goal.path.length(), content="0")
+}
+
+///|
+test "grid bfs returns single-node path when start equals goal" {
+  let grid = Grid::new(3, 3)
+
+  let result = grid.bfs(Point::{ x: 1, y: 1 }, Point::{ x: 1, y: 1 })
+  inspect(result.found, content="true")
+  inspect(result.cost, content="0")
+  inspect(result.visited, content="1")
+  inspect(result.path.length(), content="1")
+}
+
+///|
+test "grid bfs rejects blocked endpoints" {
+  let grid = Grid::new(3, 3)
+  grid.set_blocked(Point::{ x: 0, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 2, y: 2 }, true)
+
+  let result = grid.bfs(Point::{ x: 0, y: 0 }, Point::{ x: 2, y: 2 })
+  inspect(result.found, content="false")
+  inspect(result.visited, content="0")
+  inspect(result.path.length(), content="0")
+}
+
+///|
+test "grid set_cost ignores invalid input" {
+  let grid = Grid::new(3, 3)
+  grid.set_cost(Point::{ x: 1, y: 1 }, 0)
+  grid.set_cost(Point::{ x: 1, y: 1 }, -8)
+
+  inspect(grid.cost_at(Point::{ x: 1, y: 1 }), content="1")
+}
+
+///|
+test "grid dijkstra rejects invalid endpoints" {
+  let grid = Grid::new(3, 3)
+
+  let invalid_start = grid.dijkstra(Point::{ x: -1, y: 0 }, Point::{ x: 2, y: 2 })
+  inspect(invalid_start.found, content="false")
+  inspect(invalid_start.visited, content="0")
+  inspect(invalid_start.path.length(), content="0")
+
+  let invalid_goal = grid.dijkstra(Point::{ x: 0, y: 0 }, Point::{ x: 9, y: 9 })
+  inspect(invalid_goal.found, content="false")
+  inspect(invalid_goal.visited, content="0")
+  inspect(invalid_goal.path.length(), content="0")
+}
+
+///|
+test "grid dijkstra returns single-node path when start equals goal" {
+  let grid = Grid::new(3, 3)
+
+  let result = grid.dijkstra(Point::{ x: 1, y: 1 }, Point::{ x: 1, y: 1 })
+  inspect(result.found, content="true")
+  inspect(result.cost, content="0")
+  inspect(result.visited, content="1")
+  inspect(result.path.length(), content="1")
+}
+
+///|
+test "grid astar rejects invalid endpoints" {
+  let grid = Grid::new(3, 3)
+
+  let invalid_start = grid.astar(Point::{ x: -1, y: 0 }, Point::{ x: 2, y: 2 })
+  inspect(invalid_start.found, content="false")
+  inspect(invalid_start.visited, content="0")
+  inspect(invalid_start.path.length(), content="0")
+
+  let invalid_goal = grid.astar(Point::{ x: 0, y: 0 }, Point::{ x: 9, y: 9 })
+  inspect(invalid_goal.found, content="false")
+  inspect(invalid_goal.visited, content="0")
+  inspect(invalid_goal.path.length(), content="0")
+}
+
+///|
+test "grid astar returns single-node path when start equals goal" {
+  let grid = Grid::new(3, 3)
+
+  let result = grid.astar(Point::{ x: 1, y: 1 }, Point::{ x: 1, y: 1 })
+  inspect(result.found, content="true")
+  inspect(result.cost, content="0")
+  inspect(result.visited, content="1")
+  inspect(result.path.length(), content="1")
+}
+
+///|
+test "grid bfs rejects fully blocked map" {
+  let grid = Grid::new(2, 2)
+  grid.set_blocked(Point::{ x: 0, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 0, y: 1 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 1 }, true)
+
+  let result = grid.bfs(Point::{ x: 0, y: 0 }, Point::{ x: 1, y: 1 })
+  inspect(result.found, content="false")
+  inspect(result.visited, content="0")
+  inspect(result.path.length(), content="0")
+}
+
+///|
+test "grid dijkstra rejects fully blocked map" {
+  let grid = Grid::new(2, 2)
+  grid.set_blocked(Point::{ x: 0, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 0, y: 1 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 1 }, true)
+
+  let result = grid.dijkstra(Point::{ x: 0, y: 0 }, Point::{ x: 1, y: 1 })
+  inspect(result.found, content="false")
+  inspect(result.visited, content="0")
+  inspect(result.path.length(), content="0")
+}
+
+///|
+test "grid astar rejects fully blocked map" {
+  let grid = Grid::new(2, 2)
+  grid.set_blocked(Point::{ x: 0, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 0, y: 1 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 1 }, true)
+
+  let result = grid.astar(Point::{ x: 0, y: 0 }, Point::{ x: 1, y: 1 })
+  inspect(result.found, content="false")
+  inspect(result.visited, content="0")
+  inspect(result.path.length(), content="0")
 }
 
 ///|
