@@ -84,6 +84,69 @@ pub fn Grid::to_graph(self : Grid) -> Graph {
 }
 
 ///|
+pub fn Grid::has_path(self : Grid, start : Point, goal : Point) -> Bool {
+  guard self.inside(start) && self.inside(goal) else {
+    return false
+  }
+  guard !self.is_blocked(start) && !self.is_blocked(goal) else {
+    return false
+  }
+
+  let start_id = self.index(start)
+  let goal_id = self.index(goal)
+  if start_id == goal_id {
+    return true
+  }
+
+  let total = self.width * self.height
+  let queue = [start_id]
+  let seen = Array::make(total, false)
+  let mut head = 0
+  seen[start_id] = true
+
+  while head < queue.length() {
+    let current = queue[head]
+    head = head + 1
+
+    let p = self.point(current)
+    if self.enqueue_reachability_neighbor(
+        queue,
+        seen,
+      Point::{ x: p.x + 1, y: p.y },
+      goal_id,
+    ) {
+      return true
+    }
+    if self.enqueue_reachability_neighbor(
+        queue,
+        seen,
+      Point::{ x: p.x - 1, y: p.y },
+      goal_id,
+    ) {
+      return true
+    }
+    if self.enqueue_reachability_neighbor(
+        queue,
+        seen,
+      Point::{ x: p.x, y: p.y + 1 },
+      goal_id,
+    ) {
+      return true
+    }
+    if self.enqueue_reachability_neighbor(
+        queue,
+        seen,
+      Point::{ x: p.x, y: p.y - 1 },
+      goal_id,
+    ) {
+      return true
+    }
+  }
+
+  false
+}
+
+///|
 pub fn Grid::astar(self : Grid, start : Point, goal : Point) -> PathReport {
   guard self.inside(start) && self.inside(goal) else {
     return PathReport::not_found(0)
@@ -551,6 +614,29 @@ fn Grid::enqueue_bidirectional_neighbor(
     queue.push(next)
     -1
   }
+}
+
+///|
+fn Grid::enqueue_reachability_neighbor(
+  self : Grid,
+  queue : Array[Int],
+  seen : Array[Bool],
+  next_point : Point,
+  goal : Int,
+) -> Bool {
+  if self.is_blocked(next_point) {
+    return false
+  }
+  let next = self.index(next_point)
+  if seen[next] {
+    return false
+  }
+  seen[next] = true
+  if next == goal {
+    return true
+  }
+  queue.push(next)
+  false
 }
 
 ///|

@@ -32,6 +32,7 @@ PathForge provides graph search and grid pathfinding primitives for MoonBit.
 - `Grid::set_cost(self : Grid, p : Point, cost : Int) -> Unit`: set the movement cost of entering a cell. Costs below `1` and out-of-bounds points are ignored.
 - `Grid::cost_at(self : Grid, p : Point) -> Int`: return the cost of entering the cell. Out-of-bounds points return the internal infinite cost sentinel.
 - `Grid::to_graph(self : Grid) -> Graph`: convert the grid to a directed graph.
+- `Grid::has_path(self : Grid, start : Point, goal : Point) -> Bool`: test reachability without building a full path.
 - `Grid::astar(self : Grid, start : Point, goal : Point) -> PathReport`: run A* using Manhattan distance.
 - `Grid::bfs(self : Grid, start : Point, goal : Point) -> PathReport`: run unweighted BFS.
 - `Grid::bidirectional_bfs(self : Grid, start : Point, goal : Point) -> PathReport`: run bidirectional BFS.

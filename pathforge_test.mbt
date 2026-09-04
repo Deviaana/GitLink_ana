@@ -218,6 +218,33 @@ test "grid bfs rejects blocked endpoints" {
 }
 
 ///|
+test "grid has_path detects reachable node" {
+  let grid = Grid::new(4, 4)
+  grid.set_blocked(Point::{ x: 1, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 1 }, true)
+
+  inspect(grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 3, y: 0 }), content="true")
+}
+
+///|
+test "grid has_path detects unreachable node" {
+  let grid = Grid::new(3, 3)
+  grid.set_blocked(Point::{ x: 1, y: 0 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 1 }, true)
+  grid.set_blocked(Point::{ x: 1, y: 2 }, true)
+
+  inspect(grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 2, y: 0 }), content="false")
+}
+
+///|
+test "grid has_path rejects invalid endpoints" {
+  let grid = Grid::new(3, 3)
+
+  inspect(grid.has_path(Point::{ x: -1, y: 0 }, Point::{ x: 2, y: 2 }), content="false")
+  inspect(grid.has_path(Point::{ x: 0, y: 0 }, Point::{ x: 9, y: 9 }), content="false")
+}
+
+///|
 test "grid set_cost ignores invalid input" {
   let grid = Grid::new(3, 3)
   grid.set_cost(Point::{ x: 1, y: 1 }, 0)

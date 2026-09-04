@@ -63,6 +63,16 @@ println("found: \{result.found}")
 println("cost: \{result.cost}")
 ```
 
+For reachability-only checks, `Grid::has_path` avoids reconstructing a full path:
+
+```moonbit
+let reachable = grid.has_path(
+  @pathforge.Point::{ x: 0, y: 0 },
+  @pathforge.Point::{ x: 7, y: 4 },
+)
+println(reachable)
+```
+
 ## API Documentation
 
 See [docs/api.md](docs/api.md) for the public API reference.
