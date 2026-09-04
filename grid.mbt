@@ -62,7 +62,7 @@ pub fn Grid::cost_at(self : Grid, p : Point) -> Int {
   if self.inside(p) {
     self.weights[self.index(p)]
   } else {
-    1_000_000_000
+    INF_COST
   }
 }
 
@@ -99,8 +99,7 @@ pub fn Grid::astar(self : Grid, start : Point, goal : Point) -> PathReport {
   }
 
   let total = self.width * self.height
-  let inf = 1_000_000_000
-  let g_score = Array::make(total, inf)
+  let g_score = Array::make(total, INF_COST)
   let parent = Array::make(total, -1)
   let closed = Array::make(total, false)
   let open = PriorityQueue::new()
@@ -122,7 +121,7 @@ pub fn Grid::astar(self : Grid, start : Point, goal : Point) -> PathReport {
       return PathReport::success(
         g_score[goal_id],
         visited,
-        grid_rebuild(parent, start_id, goal_id),
+        rebuild_path(parent, start_id, goal_id),
       )
     }
 
@@ -203,9 +202,9 @@ pub fn Grid::bfs(self : Grid, start : Point, goal : Point) -> PathReport {
         goal_id,
       ) {
       return PathReport::success(
-        grid_steps(parent, start_id, goal_id),
+        path_steps(parent, start_id, goal_id),
         visited,
-        grid_rebuild(parent, start_id, goal_id),
+        rebuild_path(parent, start_id, goal_id),
       )
     }
     if self.enqueue_grid_neighbor(
@@ -217,9 +216,9 @@ pub fn Grid::bfs(self : Grid, start : Point, goal : Point) -> PathReport {
         goal_id,
       ) {
       return PathReport::success(
-        grid_steps(parent, start_id, goal_id),
+        path_steps(parent, start_id, goal_id),
         visited,
-        grid_rebuild(parent, start_id, goal_id),
+        rebuild_path(parent, start_id, goal_id),
       )
     }
     if self.enqueue_grid_neighbor(
@@ -231,9 +230,9 @@ pub fn Grid::bfs(self : Grid, start : Point, goal : Point) -> PathReport {
         goal_id,
       ) {
       return PathReport::success(
-        grid_steps(parent, start_id, goal_id),
+        path_steps(parent, start_id, goal_id),
         visited,
-        grid_rebuild(parent, start_id, goal_id),
+        rebuild_path(parent, start_id, goal_id),
       )
     }
     if self.enqueue_grid_neighbor(
@@ -245,9 +244,9 @@ pub fn Grid::bfs(self : Grid, start : Point, goal : Point) -> PathReport {
         goal_id,
       ) {
       return PathReport::success(
-        grid_steps(parent, start_id, goal_id),
+        path_steps(parent, start_id, goal_id),
         visited,
-        grid_rebuild(parent, start_id, goal_id),
+        rebuild_path(parent, start_id, goal_id),
       )
     }
   }
@@ -307,7 +306,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x + 1, y: p.y },
         )
         if meet_right != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_right,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -321,7 +320,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x - 1, y: p.y },
         )
         if meet_left != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_left,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -335,7 +334,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x, y: p.y + 1 },
         )
         if meet_down != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_down,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -349,7 +348,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x, y: p.y - 1 },
         )
         if meet_up != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_up,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -371,7 +370,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x + 1, y: p.y },
         )
         if meet_right != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_right,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -385,7 +384,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x - 1, y: p.y },
         )
         if meet_left != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_left,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -399,7 +398,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x, y: p.y + 1 },
         )
         if meet_down != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_down,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -413,7 +412,7 @@ pub fn Grid::bidirectional_bfs(
           Point::{ x: p.x, y: p.y - 1 },
         )
         if meet_up != -1 {
-          let path = grid_rebuild_bidirectional(
+          let path = rebuild_bidirectional_path(
             parent_start, parent_goal, start_id, meet_up,
           )
           return PathReport::success(path.length() - 1, visited, path)
@@ -441,8 +440,7 @@ pub fn Grid::dijkstra(self : Grid, start : Point, goal : Point) -> PathReport {
   }
 
   let total = self.width * self.height
-  let inf = 1_000_000_000
-  let dist = Array::make(total, inf)
+  let dist = Array::make(total, INF_COST)
   let parent = Array::make(total, -1)
   let visited_nodes = Array::make(total, false)
   let open = PriorityQueue::new()
@@ -464,7 +462,7 @@ pub fn Grid::dijkstra(self : Grid, start : Point, goal : Point) -> PathReport {
       return PathReport::success(
         dist[goal_id],
         visited,
-        grid_rebuild(parent, start_id, goal_id),
+        rebuild_path(parent, start_id, goal_id),
       )
     }
 
@@ -596,61 +594,6 @@ fn Grid::relax_grid_neighbor_by_cost(
     parent[next] = current
     open.push(next, tentative)
   }
-}
-
-///|
-fn grid_rebuild(parent : Array[Int], start : Int, goal : Int) -> Array[Int] {
-  let path : Array[Int] = []
-  let mut current = goal
-  while current != -1 {
-    path.push(current)
-    if current == start {
-      break
-    }
-    current = parent[current]
-  }
-  grid_reverse(path)
-}
-
-///|
-fn grid_rebuild_bidirectional(
-  parent_start : Array[Int],
-  parent_goal : Array[Int],
-  start : Int,
-  meet : Int,
-) -> Array[Int] {
-  let path = grid_rebuild(parent_start, start, meet)
-  let mut current = parent_goal[meet]
-  while current != -1 {
-    path.push(current)
-    current = parent_goal[current]
-  }
-  path
-}
-
-///|
-fn grid_reverse(items : Array[Int]) -> Array[Int] {
-  let result : Array[Int] = []
-  let mut i = items.length() - 1
-  while i >= 0 {
-    result.push(items[i])
-    if i == 0 {
-      break
-    }
-    i = i - 1
-  }
-  result
-}
-
-///|
-fn grid_steps(parent : Array[Int], start : Int, goal : Int) -> Int {
-  let mut count = 0
-  let mut current = goal
-  while current != start && current != -1 {
-    count = count + 1
-    current = parent[current]
-  }
-  count
 }
 
 ///|

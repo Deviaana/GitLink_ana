@@ -5,6 +5,9 @@ pub(all) struct Edge {
 }
 
 ///|
+const INF_COST : Int = 1_000_000_000
+ 
+///|
 pub(all) struct Graph {
   mut adj : Array[Array[Edge]]
 }
@@ -151,9 +154,9 @@ pub fn Graph::bfs(self : Graph, start : Int, goal : Int) -> PathReport {
         parent[next] = current
         if next == goal {
           return PathReport::success(
-            steps(parent, start, goal),
+            path_steps(parent, start, goal),
             visited,
-            rebuild(parent, start, goal),
+            rebuild_path(parent, start, goal),
           )
         }
         queue.push(next)
@@ -175,8 +178,7 @@ pub fn Graph::dijkstra(self : Graph, start : Int, goal : Int) -> PathReport {
 
   // Dijkstra always expands the unvisited node with the lowest known cost.
   let n = self.node_count()
-  let inf = 1_000_000_000
-  let dist = Array::make(n, inf)
+  let dist = Array::make(n, INF_COST)
   // parent records the cheapest predecessor discovered for each node.
   let parent = Array::make(n, -1)
   let visited = Array::make(n, false)
@@ -197,7 +199,7 @@ pub fn Graph::dijkstra(self : Graph, start : Int, goal : Int) -> PathReport {
       return PathReport::success(
         dist[goal],
         count,
-        rebuild(parent, start, goal),
+        rebuild_path(parent, start, goal),
       )
     }
 
@@ -232,8 +234,7 @@ pub fn Graph::astar(
   // A* uses g_score for the known path cost and the heuristic for direction.
   // A priority is therefore: known cost + estimated remaining cost.
   let n = self.node_count()
-  let inf = 1_000_000_000
-  let g_score = Array::make(n, inf)
+  let g_score = Array::make(n, INF_COST)
   let parent = Array::make(n, -1)
   let closed = Array::make(n, false)
   let mut count = 0
@@ -257,7 +258,7 @@ pub fn Graph::astar(
       return PathReport::success(
         g_score[goal],
         count,
-        rebuild(parent, start, goal),
+        rebuild_path(parent, start, goal),
       )
     }
 
@@ -274,44 +275,4 @@ pub fn Graph::astar(
   }
 
   PathReport::not_found(count)
-}
-
-///|
-fn rebuild(parent : Array[Int], start : Int, goal : Int) -> Array[Int] {
-  let path : Array[Int] = []
-  let mut current = goal
-  // Walk backward through parent links, then reverse to get start -> goal.
-  while current != -1 {
-    path.push(current)
-    if current == start {
-      break
-    }
-    current = parent[current]
-  }
-  reverse(path)
-}
-
-///|
-fn reverse(items : Array[Int]) -> Array[Int] {
-  let result : Array[Int] = []
-  let mut i = items.length() - 1
-  while i >= 0 {
-    result.push(items[i])
-    if i == 0 {
-      break
-    }
-    i = i - 1
-  }
-  result
-}
-
-///|
-fn steps(parent : Array[Int], start : Int, goal : Int) -> Int {
-  let mut count = 0
-  let mut current = goal
-  while current != start && current != -1 {
-    count = count + 1
-    current = parent[current]
-  }
-  count
 }

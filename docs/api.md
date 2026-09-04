@@ -29,8 +29,8 @@ PathForge provides graph search and grid pathfinding primitives for MoonBit.
 - `Grid::point(self : Grid, index : Int) -> Point`: convert a graph node id back to a point.
 - `Grid::set_blocked(self : Grid, p : Point, value : Bool) -> Unit`: mark or unmark an obstacle.
 - `Grid::is_blocked(self : Grid, p : Point) -> Bool`: return true for blocked or out-of-bounds points.
-- `Grid::set_cost(self : Grid, p : Point, cost : Int) -> Unit`: set the movement cost of entering a cell. Costs below `1` are ignored.
-- `Grid::cost_at(self : Grid, p : Point) -> Int`: return the cell cost.
+- `Grid::set_cost(self : Grid, p : Point, cost : Int) -> Unit`: set the movement cost of entering a cell. Costs below `1` and out-of-bounds points are ignored.
+- `Grid::cost_at(self : Grid, p : Point) -> Int`: return the cost of entering the cell. Out-of-bounds points return the internal infinite cost sentinel.
 - `Grid::to_graph(self : Grid) -> Graph`: convert the grid to a directed graph.
 - `Grid::astar(self : Grid, start : Point, goal : Point) -> PathReport`: run A* using Manhattan distance.
 - `Grid::bfs(self : Grid, start : Point, goal : Point) -> PathReport`: run unweighted BFS.
