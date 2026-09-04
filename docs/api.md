@@ -1,6 +1,7 @@
 # PathForge API
 
 PathForge provides graph search and grid pathfinding primitives for MoonBit.
+`Graph` contains the generic search core, while `Grid` is the two-dimensional adapter layer.
 
 ## Graph
 

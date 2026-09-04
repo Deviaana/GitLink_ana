@@ -77,6 +77,10 @@ println(reachable)
 
 See [docs/api.md](docs/api.md) for the public API reference.
 
+## Maintenance
+
+See [docs/maintenance.md](docs/maintenance.md) for the long-term maintenance and release checklist.
+
 ## Publishing
 
 The module metadata in `moon.mod` includes mooncakes.io fields: `license`, `keywords`, `repository`, `description`, and `homepage`.
