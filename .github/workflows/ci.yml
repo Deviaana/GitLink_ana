@@ -35,6 +35,7 @@ jobs:
 
       - name: Install MoonBit
         run: |
+          export MOONBIT_INSTALL_VERSION="0.10.4+2cc641edf"
           /bin/bash -c "$(curl -fsSL https://cli.moonbitlang.com/install/unix.sh)"
           echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
 
